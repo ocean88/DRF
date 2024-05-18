@@ -10,7 +10,6 @@ class User(AbstractUser):
     username = None
     email = models.EmailField(unique=True, verbose_name='Email')
     avatar = models.ImageField(upload_to='avatars/', verbose_name='Аватар', help_text='Загрузите аватар', **NULLABLE)
-    token = models.CharField(max_length=100, verbose_name="Код верификации", **NULLABLE)
     phone = PhoneNumberField(verbose_name="Номер телефона",**NULLABLE)
     city = models.CharField(max_length=100, **NULLABLE)
 

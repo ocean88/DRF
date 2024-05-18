@@ -31,3 +31,8 @@ class Lesson(models.Model):
     class Meta:
         verbose_name = 'Урок'
         verbose_name_plural = 'Уроки'
+
+
+class count_lessons(models.Model):
+    count_course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='count_lessons')
+    count_lessons = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='count_lessons')
