@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.utils import timezone
 # Create your models here.
 
 NULLABLE = {'blank': True, 'null': True}
@@ -33,6 +33,3 @@ class Lesson(models.Model):
         verbose_name_plural = 'Уроки'
 
 
-class count_lessons(models.Model):
-    count_course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='count_lessons')
-    count_lessons = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='count_lessons')
