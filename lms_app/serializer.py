@@ -1,18 +1,6 @@
 from rest_framework import serializers
-
 from lms_app.models import Course, Lesson
 from users.models import Payment
-
-
-class CourseSerializer(serializers.ModelSerializer):
-    lesson_count = serializers.SerializerMethodField()
-
-    def get_lesson_count(self, obj):
-        return obj.lessons.count()
-
-    class Meta:
-        model = Course
-        fields = ['id', 'title', 'preview', 'description', 'lesson_count']
 
 
 class LessonSerializer(serializers.ModelSerializer):

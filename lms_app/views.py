@@ -1,6 +1,6 @@
 from rest_framework import viewsets, generics
 from lms_app.models import Course, Lesson
-from lms_app.serializer import CourseSerializer, LessonSerializer, CourseWithLessonsSerializer, PaymentSerializer
+from lms_app.serializer import LessonSerializer, CourseWithLessonsSerializer, PaymentSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from users.models import Payment
