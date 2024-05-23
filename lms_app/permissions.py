@@ -23,15 +23,10 @@ class IsOwnerOrStaff(permissions.BasePermission):
 
 
 class IsOwner(permissions.BasePermission):
-    """
-    Разрешение позволяет доступ только владельцу объекта.
-    """
+    message = 'Вы не являетесь владельцем этой записи.'
 
     def has_object_permission(self, request, view, obj):
-        # Разрешение на чтение (GET, HEAD или OPTIONS) доступно всем
-        if obj.owner == request.user:
-            return True
-        return False
+        return obj.owner == request.user
 
 
 class IsModerOrReadOnly(permissions.BasePermission):

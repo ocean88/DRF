@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from lms_app.models import Course, Lesson
 from users.models import Payment
+from django.core.exceptions import ObjectDoesNotExist
 
 
 class LessonSerializer(serializers.ModelSerializer):
@@ -14,7 +15,11 @@ class CourseWithLessonsSerializer(serializers.ModelSerializer):
     lesson_count = serializers.SerializerMethodField()
 
     def get_lesson_count(self, obj):
-        return obj.lessons.count()
+        if hasattr(obj, 'lessons'):
+            return obj.lessons.count()
+        else:
+            # Логика для случаев, когда у пользователя нет доступа к атрибуту 'lessons'
+            return 0  # Или другое значение по умолчанию
 
     class Meta:
         model = Course

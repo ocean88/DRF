@@ -13,7 +13,17 @@ from rest_framework.exceptions import PermissionDenied
 class CourseViewSet(viewsets.ModelViewSet):
     serializer_class = CourseWithLessonsSerializer
     queryset = Course.objects.all()
-    permission_classes = (~IsModer,)
+    permission_classes = (IsAuthenticated,)
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_authenticated:
+            if user.groups.filter(name='moder').exists():
+                return Course.objects.all()
+            else:
+                return Course.objects.filter(owner=user)
+        else:
+            return Course.objects.none()
 
     def perform_create(self, serializer):
         new_lesson = serializer.save()
@@ -24,7 +34,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             self.permission_classes = (~IsModer,)
         elif self.action in ['update', 'partial_update']:
-            self.permission_classes = (IsModer | IsOwner,)
+            self.permission_classes = (IsOwner | IsModer,)
         elif self.action == 'retrieve':
             self.permission_classes = (IsAuthenticated,)
         elif self.action == 'list':
@@ -36,7 +46,7 @@ class CourseViewSet(viewsets.ModelViewSet):
 
 class LessonCreateAPIView(generics.CreateAPIView):
     serializer_class = LessonSerializer
-    permission_classes = [~IsModer]
+    permission_classes = [~IsModer, IsAuthenticated]
 
     def perform_create(self, serializer):
         new_lesson = serializer.save()
@@ -45,25 +55,43 @@ class LessonCreateAPIView(generics.CreateAPIView):
 
 
 class LessonListAPIView(generics.ListAPIView):
-    queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name='moder').exists():
+            return Lesson.objects.all()
+        return Lesson.objects.filter(owner=self.request.user)
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
     serializer_class = LessonSerializer
-    queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated, IsModer | IsOwner]
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name='moder').exists():
+            return Lesson.objects.all()
+        return Lesson.objects.filter(owner=self.request.user)
 
 
 class LessonUpdateAPIView(generics.UpdateAPIView):
     serializer_class = LessonSerializer
-    queryset = Lesson.objects.all()
-    permission_classes = [IsModerOrReadOnly, IsOwnerOrStaff]
+    permission_classes = [IsAuthenticated, IsModer | IsOwner]
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name='moder').exists():
+            return Lesson.objects.all()
+        return Lesson.objects.filter(owner=self.request.user)
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):
     serializer_class = LessonSerializer
-    queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated, IsOwner]
+
+    def get_queryset(self):
+        if self.request.user.groups.filter(name='moder').exists():
+            return Lesson.objects.all()
+        return Lesson.objects.filter(owner=self.request.user)
 
 
 class PaymentListAPIView(generics.ListAPIView):
