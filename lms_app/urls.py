@@ -2,7 +2,8 @@ from lms_app.apps import LmsAppConfig
 from rest_framework.routers import DefaultRouter
 from django.urls import path
 from lms_app.views import CourseViewSet, LessonCreateAPIView, \
-    LessonListAPIView, LessonRetrieveAPIView, LessonUpdateAPIView, LessonDestroyAPIView, PaymentListAPIView
+    LessonListAPIView, LessonRetrieveAPIView, LessonUpdateAPIView, LessonDestroyAPIView, PaymentListAPIView, \
+    ManageSubscription
 
 app_name = LmsAppConfig.name
 
@@ -38,5 +39,10 @@ urlpatterns = [
                       'payments/',
                       PaymentListAPIView.as_view(),
                       name='payment-list'
+                  ),
+                  path(
+                      'manage-subscription/',
+                      ManageSubscription.as_view(),
+                      name='manage-subscription'
                   ),
               ] + router.urls
