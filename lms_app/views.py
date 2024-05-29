@@ -46,7 +46,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         elif self.action == 'list':
             self.permission_classes = (IsAuthenticated,)
         elif self.action == 'destroy':
-            self.permission_classes = (~IsModer | IsOwner,)
+            self.permission_classes = (IsAuthenticated, ~IsModer | IsOwner,)
         return super().get_permissions()
 
     def get_serializer_context(self):
