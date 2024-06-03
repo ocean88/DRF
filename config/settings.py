@@ -10,10 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
+from datetime import timedelta
 from pathlib import Path
 from dotenv import load_dotenv
 
-load_dotenv(encoding='utf-8')
+load_dotenv(encoding="utf-8")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -40,13 +41,13 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-
+    "drf_yasg",
     "phonenumber_field",
-    'rest_framework',
-    'rest_framework_simplejwt',
-    'users',
-    'lms_app',
-    'django_filters',
+    "rest_framework",
+    "rest_framework_simplejwt",
+    "users",
+    "lms_app",
+    "django_filters",
 ]
 
 MIDDLEWARE = [
@@ -80,13 +81,11 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 REST_FRAMEWORK = {
-    'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
-    'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    "DEFAULT_FILTER_BACKENDS": ["django_filters.rest_framework.DjangoFilterBackend"],
+    "DEFAULT_AUTHENTICATION_CLASSES": (
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.AllowAny',
-    )
+    "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.AllowAny",),
 }
 
 # Database
@@ -95,11 +94,11 @@ REST_FRAMEWORK = {
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.postgresql_psycopg2",
-        'NAME': os.getenv('NAME'),
-        'USER': os.getenv('USER'),
-        'PASSWORD': os.getenv('PASSWORD'),
-        'HOST': os.getenv('HOST'),
-        'PORT': os.getenv('PORT'),
+        "NAME": os.getenv("NAME"),
+        "USER": os.getenv("USER"),
+        "PASSWORD": os.getenv("PASSWORD"),
+        "HOST": os.getenv("HOST"),
+        "PORT": os.getenv("PORT"),
     }
 }
 
@@ -145,6 +144,12 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = "users.User"
 
+SIMPLE_JWT = {
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=30),
+    # Другие настройки JWT...
+}
 
+STRIPE_SECRET_KEY = "sk_test_51PN7XWCFpmusWkE7SUQNHyDYxlJBNqYMPZmrxg2Y0JiM7hgiO1GPJF2HHRdJe0HqdonFhhVBfgCDBj8xsrJSMmZl00jYsKMxVp"
+STRIPE_PUBLISHABLE_KEY = "pk_test_51PN7XWCFpmusWkE7SUQNHyDYxlJBNqYMPZmrxg2Y0JiM7hgiO1GPJF2HHRdJe0HqdonFhhVBfgCDBj8xsrJSMmZl00jYsKMxVp"

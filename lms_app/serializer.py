@@ -10,7 +10,7 @@ class LessonSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Lesson
-        fields = '__all__'
+        fields = "__all__"
 
 
 class CourseWithLessonsSerializer(serializers.ModelSerializer):
@@ -19,37 +19,45 @@ class CourseWithLessonsSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
     def get_lesson_count(self, obj):
-        if hasattr(obj, 'lessons'):
+        if hasattr(obj, "lessons"):
             return obj.lessons.count()
         else:
             # Логика для случаев, когда у пользователя нет доступа к атрибуту 'lessons'
             return 0  # Или другое значение по умолчанию
 
     def get_is_subscribed(self, obj):
-        request = self.context.get('request')
+        request = self.context.get("request")
         if request and request.user.is_authenticated:
             return Subscription.objects.filter(user=request.user, course=obj).exists()
         return False
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'preview', 'description', 'lesson_count', 'lessons', 'is_subscribed']
+        fields = [
+            "id",
+            "title",
+            "preview",
+            "description",
+            "lesson_count",
+            "lessons",
+            "is_subscribed",
+        ]
         validators = [
-            TitleValidator(field='title'),
+            TitleValidator(field="title"),
             serializers.UniqueTogetherValidator(
                 queryset=Course.objects.all(),
-                fields=['title', 'description'],
-            )
+                fields=["title", "description"],
+            ),
         ]
 
 
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = '__all__'
+        fields = "__all__"
 
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['user', 'course']
+        fields = ["user", "course"]

@@ -2,10 +2,10 @@ from rest_framework import permissions
 
 
 class IsModer(permissions.BasePermission):
-    message = 'Недостаточно прав для выполнения данного действия'
+    message = "Недостаточно прав для выполнения данного действия"
 
     def has_permission(self, request, view):
-        return request.user.groups.filter(name='moder').exists()
+        return request.user.groups.filter(name="moder").exists()
 
 
 class IsOwnerOrStaff(permissions.BasePermission):
@@ -23,7 +23,7 @@ class IsOwnerOrStaff(permissions.BasePermission):
 
 
 class IsOwner(permissions.BasePermission):
-    message = 'Вы не являетесь владельцем этой записи.'
+    message = "Вы не являетесь владельцем этой записи."
 
     def has_object_permission(self, request, view, obj):
         return obj.owner == request.user
@@ -41,8 +41,8 @@ class IsModerOrReadOnly(permissions.BasePermission):
 
         # Allow editing if user is in 'moder' group and has the change permission
         if request.user.is_authenticated:
-            if request.user.groups.filter(name='moder').exists():
-                return request.user.has_perm('lms_app.change_lesson')
+            if request.user.groups.filter(name="moder").exists():
+                return request.user.has_perm("lms_app.change_lesson")
             # Allow full access to authenticated users not in 'moder' group
             return True
         # Deny if request is not safe and user is not authenticated
@@ -55,8 +55,8 @@ class IsModerOrReadOnly(permissions.BasePermission):
 
         # Allow editing if user is in 'moder' group and has the change permission
         if request.user.is_authenticated:
-            if request.user.groups.filter(name='moder').exists():
-                return request.user.has_perm('lms_app.change_lesson')
+            if request.user.groups.filter(name="moder").exists():
+                return request.user.has_perm("lms_app.change_lesson")
             # Allow full access to authenticated users not in 'moder' group
             return True
         # Deny if request is not safe and user is not authenticated

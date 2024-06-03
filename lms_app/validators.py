@@ -10,7 +10,7 @@ class TitleValidator:
         reg = re.compile("^[А-Яа-яA-Za-z0-9]+$")
         tmp_val = value.get(self.field)
         if not bool(reg.fullmatch(tmp_val)):
-            raise ValidationError(f'Неверное значение в поле {self.field}: {tmp_val}')
+            raise ValidationError(f"Неверное значение в поле {self.field}: {tmp_val}")
 
 
 def validate_video_url(value):
@@ -18,7 +18,7 @@ def validate_video_url(value):
         raise ValidationError("Некорректный тип данных, ожидается строка")
 
     youtube_regex = re.compile(
-        r'^(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/.+$'
+        r"^(https?://)?(www\.)?(youtube|youtu|youtube-nocookie)\.(com|be)/.+$"
     )
 
     if not youtube_regex.match(value):
