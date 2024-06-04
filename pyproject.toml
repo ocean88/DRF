@@ -21,6 +21,9 @@ drf-yasg = "^1.21.7"
 setuptools = "^70.0.0"
 requests = "^2.32.3"
 stripe = "^9.9.0"
+celery = "^5.4.0"
+redis = "^5.0.4"
+django-celery-beat = "^2.6.0"
 
 
 [build-system]

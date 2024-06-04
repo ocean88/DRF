@@ -151,5 +151,12 @@ SIMPLE_JWT = {
     # Другие настройки JWT...
 }
 
-STRIPE_SECRET_KEY = "sk_test_51PN7XWCFpmusWkE7SUQNHyDYxlJBNqYMPZmrxg2Y0JiM7hgiO1GPJF2HHRdJe0HqdonFhhVBfgCDBj8xsrJSMmZl00jYsKMxVp"
-STRIPE_PUBLISHABLE_KEY = "pk_test_51PN7XWCFpmusWkE7SUQNHyDYxlJBNqYMPZmrxg2Y0JiM7hgiO1GPJF2HHRdJe0HqdonFhhVBfgCDBj8xsrJSMmZl00jYsKMxVp"
+STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
+STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
+
+CELERY_BEAT_SCHEDULE = {
+    'task-name': {
+        'task': 'myapp.tasks.my_task',  # Путь к задаче
+        'schedule': timedelta(minutes=10),  # Расписание выполнения задачи (например, каждые 10 минут)
+    },
+}
