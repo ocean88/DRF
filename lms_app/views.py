@@ -1,25 +1,17 @@
+from django.contrib.auth.models import AnonymousUser
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework import viewsets, generics
-from lms_app.models import Course, Lesson
+from lms_app.models import Course, Lesson, Subscription
 from lms_app.paginators import CustomPageNumberPagination
 from lms_app.permissions import IsOwnerOrStaff, IsOwner, IsModerOrReadOnly, IsModer
-from lms_app.serializer import (
-    LessonSerializer,
-    CourseWithLessonsSerializer,
-    PaymentSerializer,
-)
+from lms_app.serializer import LessonSerializer, CourseWithLessonsSerializer, PaymentSerializer
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.filters import OrderingFilter
 from users.models import Payment
-from rest_framework.permissions import (
-    IsAuthenticated,
-    AllowAny,
-    IsAuthenticatedOrReadOnly,
-)
+from rest_framework.permissions import IsAuthenticated, AllowAny, IsAuthenticatedOrReadOnly
 from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
-from lms_app.models import Subscription, Course
 from rest_framework.response import Response
 from rest_framework import status
 
@@ -92,18 +84,15 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         if self.action == "create":
-            self.permission_classes = (~IsModer,)
+            self.permission_classes = [~IsModer]
         elif self.action in ["update", "partial_update"]:
-            self.permission_classes = (IsOwner | IsModer,)
+            self.permission_classes = [IsOwner | IsModer]
         elif self.action == "retrieve":
-            self.permission_classes = (IsAuthenticated,)
+            self.permission_classes = [IsAuthenticated]
         elif self.action == "list":
-            self.permission_classes = (IsAuthenticated,)
+            self.permission_classes = [IsAuthenticated]
         elif self.action == "destroy":
-            self.permission_classes = (
-                IsAuthenticated,
-                ~IsModer | IsOwner,
-            )
+            self.permission_classes = [IsAuthenticated, (~IsModer | IsOwner)]
         return super().get_permissions()
 
     def get_serializer_context(self):
@@ -140,7 +129,9 @@ class LessonListAPIView(generics.ListAPIView):
     def get_queryset(self):
         if self.request.user.groups.filter(name="moder").exists():
             return Lesson.objects.all()
-        return Lesson.objects.filter(owner=self.request.user)
+        if getattr(self, 'swagger_fake_view', False):
+            return Lesson.objects.none()  # Return an empty queryset for schema generation
+        return super().get_queryset()
 
 
 class LessonRetrieveAPIView(generics.RetrieveAPIView):
@@ -149,11 +140,15 @@ class LessonRetrieveAPIView(generics.RetrieveAPIView):
 
     @swagger_auto_schema(
         operation_description="Просмотр урока",
-        responses={200: LessonSerializer(many=True)},
+        responses={200: LessonSerializer},
     )
     def get_queryset(self):
         if self.request.user.groups.filter(name="moder").exists():
             return Lesson.objects.all()
+        if getattr(self, 'swagger_fake_view', False):
+            return Lesson.objects.none()  # Return an empty queryset for schema generation
+        if isinstance(self.request.user, AnonymousUser):
+            return Lesson.objects.none()  # Optionally handle AnonymousUser cases separately
         return Lesson.objects.filter(owner=self.request.user)
 
 
@@ -163,11 +158,16 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
 
     @swagger_auto_schema(
         operation_description="Обновление урока",
-        responses={200: LessonSerializer(many=True)},
+        request_body=LessonSerializer,
+        responses={200: LessonSerializer},
     )
     def get_queryset(self):
         if self.request.user.groups.filter(name="moder").exists():
             return Lesson.objects.all()
+        if getattr(self, 'swagger_fake_view', False):
+            return Lesson.objects.none()
+        if isinstance(self.request.user, AnonymousUser):
+            return Lesson.objects.none()
         return Lesson.objects.filter(owner=self.request.user)
 
 
@@ -177,11 +177,15 @@ class LessonDestroyAPIView(generics.DestroyAPIView):
 
     @swagger_auto_schema(
         operation_description="Удаление урока",
-        responses={200: LessonSerializer(many=True)},
+        responses={204: "No Content"},
     )
     def get_queryset(self):
         if self.request.user.groups.filter(name="moder").exists():
             return Lesson.objects.all()
+        if getattr(self, 'swagger_fake_view', False):
+            return Lesson.objects.none()
+        if isinstance(self.request.user, AnonymousUser):
+            return Lesson.objects.none()
         return Lesson.objects.filter(owner=self.request.user)
 
 
@@ -200,7 +204,9 @@ class PaymentListAPIView(generics.ListAPIView):
     def get_queryset(self):
         if self.request.user.groups.filter(name="moder").exists():
             return Payment.objects.all()
-        return Payment.objects.filter(user=self.request.user)
+        if getattr(self, 'swagger_fake_view', False):
+            return Payment.objects.none()  # Return an empty queryset for schema generation
+        return super().get_queryset()
 
 
 class ManageSubscription(APIView):
@@ -208,7 +214,7 @@ class ManageSubscription(APIView):
 
     @swagger_auto_schema(
         operation_description="Управление подпиской",
-        responses={200: LessonSerializer(many=True)},
+        responses={200: openapi.Response('Подписка добавлена или удалена')},
     )
     def post(self, request, *args, **kwargs):
         user = request.user
