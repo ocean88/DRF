@@ -185,6 +185,6 @@ CELERY_TIMEZONE = "Asia/Yakutsk"
 CELERY_BEAT_SCHEDULE = {
     'check_inactive_users_task': {
         'task': 'lms_app.tasks.check_inactive_users',
-        'schedule': 30.0,
+        'schedule': timezone.timedelta(days=30)
     },
 }

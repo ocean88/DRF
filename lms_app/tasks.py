@@ -48,8 +48,9 @@ def send_lesson_update_email(course_id, created):
 
 @shared_task
 def check_inactive_users():
-    users = User.objects.exclude(is_superuser=True).exclude(is_staff=True)
-    print('test проверка активности юзеров')
-    for user in users:
-        user.is_active = False
+    timer = timezone.now() - timezone.timedelta(days=30)
+    inactive_users = User.objects.filter(last_login__lt=timer, is_active=False, is_staff=False)
+
+    for user in inactive_users:
+        user.is_active = True
         user.save()
