@@ -14,6 +14,7 @@ from rest_framework.views import APIView
 from django.shortcuts import get_object_or_404
 from rest_framework.response import Response
 from rest_framework import status
+from lms_app.tasks import send_course_update_email, send_lesson_update_email
 
 
 # Create your views here.
@@ -39,7 +40,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         responses={201: CourseWithLessonsSerializer},
     )
     def create(self, request, *args, **kwargs):
-        return super().create(request, *args, **kwargs)
+        response = super().create(request, *args, **kwargs)
+        course_id = response.data['id']
+        send_course_update_email.delay(course_id, created=True)
+        return response
 
     @swagger_auto_schema(
         operation_description="Получить информацию о курсе",
@@ -54,7 +58,11 @@ class CourseViewSet(viewsets.ModelViewSet):
         responses={200: CourseWithLessonsSerializer},
     )
     def update(self, request, *args, **kwargs):
-        return super().update(request, *args, **kwargs)
+        response = super().update(request, *args, **kwargs)
+        course_id = kwargs['pk']
+        send_course_update_email.delay(course_id, created=False)
+        print('курс обновлен')
+        return response
 
     @swagger_auto_schema(
         operation_description="Частично обновить информацию о курсе",
@@ -62,7 +70,10 @@ class CourseViewSet(viewsets.ModelViewSet):
         responses={200: CourseWithLessonsSerializer},
     )
     def partial_update(self, request, *args, **kwargs):
-        return super().partial_update(request, *args, **kwargs)
+        response = super().partial_update(request, *args, **kwargs)
+        course_id = kwargs['pk']
+        send_course_update_email.delay(course_id, created=False)
+        return response
 
     @swagger_auto_schema(
         operation_description="Удалить курс", responses={204: "No Content"}
@@ -78,9 +89,9 @@ class CourseViewSet(viewsets.ModelViewSet):
         return super().list(request, *args, **kwargs)
 
     def perform_create(self, serializer):
-        new_lesson = serializer.save()
-        new_lesson.owner = self.request.user
-        new_lesson.save()
+        new_course = serializer.save(owner=self.request.user)
+        new_course.save()
+        send_course_update_email.delay(new_course.id, created=True)
 
     def get_permissions(self):
         if self.action == "create":
@@ -112,9 +123,9 @@ class LessonCreateAPIView(generics.CreateAPIView):
         return Lesson.objects.filter(owner=self.request.user)
 
     def perform_create(self, serializer):
-        new_lesson = serializer.save()
-        new_lesson.owner = self.request.user
-        new_lesson.save()
+        new_lesson = serializer.save(owner=self.request.user)
+        course_id = new_lesson.course_id
+        send_lesson_update_email.delay(course_id, created=True)
 
 
 class LessonListAPIView(generics.ListAPIView):
@@ -169,6 +180,11 @@ class LessonUpdateAPIView(generics.UpdateAPIView):
         if isinstance(self.request.user, AnonymousUser):
             return Lesson.objects.none()
         return Lesson.objects.filter(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        updated_lesson = serializer.save()
+        course_id = updated_lesson.course_id
+        send_lesson_update_email.delay(course_id, created=False)
 
 
 class LessonDestroyAPIView(generics.DestroyAPIView):

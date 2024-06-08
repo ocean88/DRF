@@ -13,5 +13,12 @@ app = Celery('config')
 #   should have a `CELERY_` prefix.
 app.config_from_object('django.conf:settings', namespace='CELERY')
 
+app.conf.beat_schedule = {
+    'check_inactive_users_every_30_seconds': {
+        'task': 'lms_app.tasks.check_inactive_users',  # Путь к вашей задаче
+        'schedule': 30.0,  # Интервал выполнения в секундах
+    },
+}
 # Load task modules from all registered Django apps.
 app.autodiscover_tasks()
+

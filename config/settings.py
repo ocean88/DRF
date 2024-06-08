@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 import os
 from datetime import timedelta
 from pathlib import Path
+
+from django.utils import timezone
 from dotenv import load_dotenv
 
 load_dotenv(encoding="utf-8")
@@ -129,7 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = "UTC"
+TIME_ZONE = "Asia/Yakutsk"
 
 USE_I18N = True
 
@@ -153,15 +155,17 @@ SIMPLE_JWT = {
     # Другие настройки JWT...
 }
 
-EMAIL_HOST =os.getenv("EMAIL_HOST")
-EMAIL_PORT = 465
-EMAIL_USE_SSL = True
-EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER ")
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+
+EMAIL_HOST = os.getenv("EMAIL_HOST")
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_SSL = os.getenv('EMAIL_USE_SSL')
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
 LOCATION = os.getenv("STRIPE_SECRET_KEY")
-
-
 STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 STRIPE_PUBLISHABLE_KEY = os.getenv("STRIPE_PUBLISHABLE_KEY")
 
@@ -170,18 +174,17 @@ CELERY_BROKER_URL = 'redis://localhost:6379' # Например, Redis, кото
 # URL-адрес брокера результатов, также Redis
 CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 
-# Часовой пояс для работы Celery
-CELERY_TIMEZONE = "Russia/Yakutsk"
-
 # Флаг отслеживания выполнения задач
-CELERY_TASK_TRACK_STARTED = True 
+CELERY_TASK_TRACK_STARTED = True
 
 # Максимальное время на выполнение задачи
 CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BEAT_SCHEDULER = "django_celery_beat.schedulers:DatabaseScheduler"
+CELERY_TIMEZONE = "Asia/Yakutsk"
 
 CELERY_BEAT_SCHEDULE = {
-    'task-name': {
-        'task': 'myapp.tasks.my_task',  # Путь к задаче
-        'schedule': timedelta(minutes=10),  # Расписание выполнения задачи (например, каждые 10 минут)
+    'check_inactive_users_task': {
+        'task': 'lms_app.tasks.check_inactive_users',
+        'schedule': 30.0,
     },
 }
