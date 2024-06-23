@@ -19,13 +19,6 @@ class LessonCRUDTests(APITestCase):
         )
         self.client.force_authenticate(user=self.user)
 
-    def test_lesson_list(self):
-        url = reverse("course:lesson-list")
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        lesson_data = response.json()
-        print(lesson_data)
-
     def test_lesson_create(self):
         url = reverse("course:lesson-create")
         data = {

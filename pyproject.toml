@@ -25,6 +25,7 @@ celery = "^5.4.0"
 redis = "^5.0.4"
 django-celery-beat = "^2.6.0"
 eventlet = "^0.36.1"
+django-redis = "^5.4.0"
 
 
 [build-system]
